@@ -8,10 +8,10 @@ class TimeCounter:
         self.elapsed_time = 0
         self.counted_times = []
 
-    def start(self):
+    def start_counting(self):
         self.start_time = time.time()
 
-    def end(self):
+    def stop_counting(self):
         self.elapsed_time = time.time() - self.start_time
         self.counted_times.append(self.elapsed_time)
         return self.elapsed_time
@@ -19,7 +19,7 @@ class TimeCounter:
     def info(self):
         return f"{self.elapsed_time:.2f}s"
 
-    def game_stats(self):
+    def time_stats(self):
         return (
             f"Time Stats:\n"
             f"Average time for correct answer: {sum(self.counted_times) / len(self.counted_times):.2f}s\n"
