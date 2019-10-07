@@ -17,7 +17,6 @@ class PointsCounter:
             elapsed_time = self.BRAIN_LAG
 
         elapsed_time_for_letter = (elapsed_time - self.BRAIN_LAG) / word_length
-        print(elapsed_time_for_letter)
 
         points_correct_answer = int(
             self.MAX_POINTS_FOR_LETTER

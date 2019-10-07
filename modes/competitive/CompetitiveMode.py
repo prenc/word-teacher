@@ -52,7 +52,8 @@ class CompeteMode:
             self.pc.correct_answer(elapsed_time, self.rc.round_number, source)
             self.sc.increment_streak()
             message = (
-                self.sc.strike_info()
+                "\033[1;32m ✔ \033[0m"
+                + self.sc.strike_info()
                 + " "
                 + self.tc.info()
                 + " +"
@@ -61,7 +62,7 @@ class CompeteMode:
         else:
             self.sc.finish_streak()
             self.mwt.add_mistake((source, translation))
-            message = f"Nope, correct is {source}"
+            message = f"\033[1;31m ✘ \033[0m➜ {source}"
         print(message)
 
     def _print_finish_round_message(self):
