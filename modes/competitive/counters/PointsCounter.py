@@ -12,4 +12,4 @@ class PointsCounter:
         return f"{self.points_sum}"
 
     def points_summary(self):
-        pass
+        return f"You scored {self.points_sum}"

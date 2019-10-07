@@ -6,6 +6,7 @@ class ArgumentParser:
         self._parser = argparse.ArgumentParser(
             description="Do what you want with words."
         )
+        self._add_arguments()
 
     def _add_arguments(self):
         self._parser.add_argument("file", type=str)

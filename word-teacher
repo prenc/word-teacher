@@ -20,7 +20,7 @@ def main():
         random.shuffle(output)
 
     if parsed_args.learn:
-        CompeteMode(source_to_translated).learn()
+        CompeteMode(source_to_translated).play()
 
 
 if __name__ == "__main__":

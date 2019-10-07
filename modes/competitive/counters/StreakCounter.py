@@ -2,10 +2,10 @@ class StreakCounter:
     def __init__(self):
         self._streak_count = 0
 
-    def wrong_answer(self):
+    def finish_streak(self):
         self._streak_count = 0
 
-    def correct_answer(self):
+    def increment_streak(self):
         self._streak_count += 1
 
     def strike_info(self):

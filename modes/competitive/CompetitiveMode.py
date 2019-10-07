@@ -1,90 +1,71 @@
 import random
-from collections import Counter
 
 from modes.competitive.counters.PointsCounter import PointsCounter
+from modes.competitive.counters.RoundCounter import RoundCounter
 from modes.competitive.counters.StreakCounter import StreakCounter
 from modes.competitive.counters.TimeCounter import TimeCounter
+from modes.competitive.features.MistakenWordsTracker import (
+    MistakenWordsTracker,
+)
+from modes.competitive.features.RoundProgressTracker import (
+    RoundProgressTracker,
+)
 
 
 class CompeteMode:
     def __init__(self, words_pairs):
         self.words = list(words_pairs.items())
-        self.round_num = 0
-        self.words_count = len(self.words)
-        self.progress = 0
-        self.percentage = 0
-        self.hardest_words = []
+        self.word_count = len(self.words)
         self.sc = StreakCounter()
         self.tc = TimeCounter()
         self.pc = PointsCounter()
+        self.rc = RoundCounter()
+        self.mwt = MistakenWordsTracker()
+        self.rpt = RoundProgressTracker(self.word_count)
 
-    def learn(self):
+    def play(self):
         print("Begin learning by providing a translation to subsequent words.")
         while len(self.words):
-            self.do_round()
+            self._do_round()
+        print(self._game_finish_message(), end="")
         exit()
 
-    def do_round(self):
-        random.shuffle(self.words)
-        self.round_num += 1
-        mistaken_words = []
-        for source, translation in self.words:
-            self.get_and_evaluate_answer(mistaken_words, source, translation)
-        self.evaluate_progress(mistaken_words)
-        self.print_finish_round_message()
-        self.words = mistaken_words
+    def _do_round(self):
+        self.rc.new_round()
+        self.mwt.new_round()
 
-    def get_and_evaluate_answer(self, mistaken_words, source, translation):
-        self.tc.start()
+        random.shuffle(self.words)
+        for source, translation in self.words:
+            self._get_and_evaluate_answer(source, translation)
+
+        self.words = self.mwt.get_words_for_the_next_round()
+
+        self._print_finish_round_message()
+
+    def _get_and_evaluate_answer(self, source, translation):
+        self.tc.start_counting()
         answer = input(f"{translation}: ").lower().strip()
         if (
-                answer == source.translate(str.maketrans("àìòéèù", "aioeeu"))
-                or source == answer
+            answer == source.translate(str.maketrans("àìòéèù", "aioeeu"))
+            or source == answer
         ):
-            self.tc.end()
-            self.sc.correct_answer()
-            print(self.sc.strike_info() + " " + self.tc.info())
+            self.tc.stop_counting()
+            self.sc.increment_streak()
+            message = self.sc.strike_info() + " " + self.tc.info()
         else:
-            mistaken_words.append((source, translation))
-            self.hardest_words.append((source, translation))
-            self.sc.wrong_answer()
-            print(f"Nope, correct is {source}")
+            self.sc.finish_streak()
+            self.mwt.add_mistake((source, translation))
+            message = f"Nope, correct is {source}"
+        print(message)
 
-    def evaluate_progress(self, mistaken_words):
-        self.progress = self.percentage
-        self.percentage = round(
-            (1 - len(mistaken_words) / self.words_count) * 100
-        )
-        self.progress = self.percentage - self.progress
+    def _print_finish_round_message(self):
+        if len(self.words):
+            print(self.rpt.progress_info(self.words) + self.rc.round_info())
 
-    def print_finish_round_message(self):
-        if self.percentage != 100:
-            print(
-                f"You guessed {self.percentage}%(+{self.progress}) words. "
-                f"Let's proceed to round {self.round_num + 1}!"
-            )
-        else:
-            print(self.get_ending_message(self.hardest_words), end='')
-
-    def get_ending_message(self, hardest_words):
-        counted_mistakes = dict(Counter(hardest_words))
-        most_common_mistakes = []
-        for words, count in counted_mistakes.items():
-            if count > 1:
-                most_common_mistakes.append(
-                    f"{words[0]} - {words[1]}  Mistaken {count} times."
-                )
-        most_common_mistakes = "\n".join(most_common_mistakes)
-        if most_common_mistakes:
-            revise_words = (
-                f"\nThere are words that you should revise:\n"
-                f"{most_common_mistakes}"
-            )
-        else:
-            revise_words = ""
+    def _game_finish_message(self):
         return (
-            f"That's the end. It took you {self.round_num} rounds to translate "
-            f"{self.words_count} words. You can do better :P"
-            f"{revise_words}"
-            f"\n{self.tc.game_stats()}"
+            self.rc.rounds_sumamry()
+            + f"{self.word_count} words. You can do better :P\n"
+            + self.mwt.most_often_mistaken_words()
+            + self.tc.time_stats()
         )
