@@ -38,9 +38,9 @@ class CompeteMode:
         for source, translation in self.words:
             self._get_and_evaluate_answer(source, translation)
 
-        self._print_finish_round_message()
-
         self.words = self.mwt.get_words_for_the_next_round()
+
+        self._print_finish_round_message()
 
     def _get_and_evaluate_answer(self, source, translation):
         self.tc.start_counting()
@@ -59,7 +59,7 @@ class CompeteMode:
         print(message)
 
     def _print_finish_round_message(self):
-        if not len(self.words):
+        if len(self.words):
             print(self.rpt.progress_info(self.words) + self.rc.round_info())
 
     def _game_finish_message(self):
