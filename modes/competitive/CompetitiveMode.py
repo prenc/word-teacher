@@ -45,13 +45,19 @@ class CompeteMode:
     def _get_and_evaluate_answer(self, source, translation):
         self.tc.start_counting()
         answer = input(f"{translation}: ").lower().strip()
-        if (
-            answer == source.translate(str.maketrans("àìòéèù", "aioeeu"))
-            or source == answer
-        ):
-            self.tc.stop_counting()
+        if answer.translate(
+            str.maketrans("àìòéèù", "aioeeu")
+        ) == source.translate(str.maketrans("àìòéèù", "aioeeu")):
+            elapsed_time = self.tc.stop_counting()
+            self.pc.correct_answer(elapsed_time, self.rc.round_number, source)
             self.sc.increment_streak()
-            message = self.sc.strike_info() + " " + self.tc.info()
+            message = (
+                self.sc.strike_info()
+                + " "
+                + self.tc.info()
+                + " +"
+                + self.pc.last_scored_points()
+            )
         else:
             self.sc.finish_streak()
             self.mwt.add_mistake((source, translation))
@@ -60,7 +66,11 @@ class CompeteMode:
 
     def _print_finish_round_message(self):
         if len(self.words):
-            print(self.rpt.progress_info(self.words) + self.rc.round_info())
+            print(
+                self.rpt.progress_info(self.words)
+                + self.rc.round_info()
+                + self.pc.points_info()
+            )
 
     def _game_finish_message(self):
         return (
@@ -68,4 +78,5 @@ class CompeteMode:
             + f"{self.word_count} words. You can do better :P\n"
             + self.mwt.most_often_mistaken_words()
             + self.tc.time_stats()
+            + self.pc.points_summary()
         )

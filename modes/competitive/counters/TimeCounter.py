@@ -25,5 +25,5 @@ class TimeCounter:
             f"Average time for correct answer: {sum(self.counted_times) / len(self.counted_times):.2f}s\n"
             f"Quickest correct answer: {min(self.counted_times):.2f}s\n"
             f"Longest correct answer: {max(self.counted_times):.2f}s\n"
-            f"It took you {time.time() - self.program_start_time:.2f}s to get all the answers."
+            f"It took you {time.time() - self.program_start_time:.2f}s to get all the answers.\n"
         )
